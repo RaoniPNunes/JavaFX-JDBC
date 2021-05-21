@@ -1,4 +1,4 @@
-
+package Main;
 
 import java.io.IOException;
 import javafx.application.Application;
@@ -14,6 +14,8 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
     
+    private static Scene mainScene;
+    
     @Override
     public void start(Stage primaryStage) {
        try{
@@ -23,7 +25,7 @@ public class Main extends Application {
            scrollPane.setFitToWidth(true);
            scrollPane.setFitToHeight(true);
            
-           Scene mainScene = new Scene(scrollPane);
+           mainScene = new Scene(scrollPane);
            primaryStage.setScene(mainScene);
            primaryStage.setTitle("Registrador");
            primaryStage.show();
@@ -31,6 +33,10 @@ public class Main extends Application {
        catch(IOException e){
            e.printStackTrace();
        }
+    }
+    
+    public static Scene getMainScene(){
+        return mainScene;
     }
 
     
