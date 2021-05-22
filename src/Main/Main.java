@@ -35,6 +35,7 @@ public class Main extends Application {
        }
     }
     
+    //cria um método para referenciar a mainScene em outras classes
     public static Scene getMainScene(){
         return mainScene;
     }
