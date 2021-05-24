@@ -6,6 +6,7 @@ import gui.util.Alerts;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -38,12 +39,14 @@ public class MainViewController implements Initializable {
     
     @FXML
     public void onMenuItemDepartamentoAction(){
-        loadView2("/gui/DepartmentList.fxml");
+        loadView("/gui/DepartmentList.fxml", (DepartmentListController controle) -> {
+                                                controle.setDepartmentService(new DepartmentServices());
+                                                controle.updateTableView();});
     }
     
     @FXML
     public void onMenuItemAboutAction(){
-        loadView("/gui/About.fxml"); //carregar o método loadView (carregador de views fxml)e faz referência ao caminho da view About
+        loadView("/gui/About.fxml", x -> {}); //carregar o método loadView (carregador de views fxml)e faz referência ao caminho da view About
     }
     
     @Override
@@ -51,7 +54,7 @@ public class MainViewController implements Initializable {
         
     }
 
-    private synchronized void loadView(String caminho){ //Método para gerar nova janela do tipo VBox
+    private synchronized <T> void loadView(String caminho, Consumer <T> initializingAction){ //Método para gerar nova janela do tipo VBox
         
         try{
         FXMLLoader loader = new FXMLLoader(getClass().getResource(caminho));
@@ -71,6 +74,9 @@ public class MainViewController implements Initializable {
         mainVBox.getChildren().clear(); //(3)limpa todos os filhos do menu principal.
         mainVBox.getChildren().add(mainMenu); //(4) adiciona novamente o mainMenu (menu principal) ao container principal mainVBox.
         mainVBox.getChildren().addAll(newVBox.getChildren()); //(5) adiciona também o VBox e seus filhos no mainVBox.
+        
+        T controle = loader.getController();
+        initializingAction.accept(controle);
                
         }
         catch (IOException e){
@@ -78,7 +84,7 @@ public class MainViewController implements Initializable {
         }
     }
     
-    private synchronized void loadView2(String caminho){ //Método para gerar nova janela do tipo VBox
+   /* private synchronized void loadView2(String caminho){ //Método para gerar nova janela do tipo VBox
         
         try{
         FXMLLoader loader = new FXMLLoader(getClass().getResource(caminho));
@@ -92,17 +98,17 @@ public class MainViewController implements Initializable {
         mainVBox.getChildren().add(mainMenu); 
         mainVBox.getChildren().addAll(newVBox.getChildren());
         
-        //cria-se um controller do DepartmentList
-        //esse controller vai injetar a dependência do serviço e chamar o método que precisa dessa dependencia
+        //cria-se um controller do DepartmentList que tem os métodos
+        //esse controller vai injetar a dependência (2) do serviço e chamar o método (3) que precisa dessa dependencia
         
-        DepartmentListController controle = loader.getController();
-        controle.setDepartmentService(new DepartmentServices());
-        controle.updateTableView();
+        DepartmentListController controle = loader.getController();// instancia um controlador da DepartmentList e carrega
+        controle.setDepartmentService(new DepartmentServices());// (2) instancia a dependencia do DepartmentService
+        controle.updateTableView();// (3) chama o método para mostrar a lista na tabela
                
         }
         catch (IOException e){
             Alerts.showAlert("IOExcpetion", "Erro ao carregar a View", e.getMessage(), Alert.AlertType.ERROR);
         }
-    }
+    }*/
     
 }
