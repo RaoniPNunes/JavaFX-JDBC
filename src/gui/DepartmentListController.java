@@ -1,18 +1,27 @@
 
 package gui;
 
-import Main.Main;
+import gui.util.Alerts;
+import gui.util.Utils;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Department;
 import model.services.DepartmentServices;
@@ -37,16 +46,19 @@ public class DepartmentListController implements Initializable{
     private Button btNovo;
     
     //OBS: o Observable list serve para carregar listas no JavaFX
-    
     private ObservableList<Department> obsList; 
     
     public void setDepartmentService(DepartmentServices service){
         this.service = service; 
     }
-    
+    //Botão para criar novo departamento
+    //Vai carregar uma dialogView com método criado mais abaixo (createDialogForm).
+    //Para se carregar essa dialogView precisa passar o stage atual, usando o método currentStage da classe Utils.
+    //Obs: o event passado de parâmetro servirá para referência no método currentStage
     @FXML
-    public void onBtNewAction(){
-        System.out.println("onBtNewAction");
+    public void onBtNewAction(ActionEvent event){
+        Stage parentStage = Utils.currentStage(event);
+        createDialogForm("/gui/DepartmentForm.fxml", parentStage);
     }
 
     @Override
@@ -81,6 +93,27 @@ public class DepartmentListController implements Initializable{
         
         //Transfere o obsList instanciado acima para o tableView
         tableViewDepartment.setItems(obsList);
+    }
+    
+    private void createDialogForm(String caminho, Stage parentStage){
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(caminho));
+            Pane pane = loader.load();
+            
+            //Para se crair uma nova view em cima da view que está sendo mostrada
+            //é necessário se criar um novo stage.
+            
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Inserir Novo Departamento");
+            dialogStage.setScene(new Scene(pane));//-> cria-se uma nova Scene nesse novo stage
+            dialogStage.setResizable(false);
+            dialogStage.initOwner(parentStage);//-> informa-se o stage pai em que vai surgir o dialogStage view
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.showAndWait();
+        }
+        catch(IOException e){
+            Alerts.showAlert("IO Exception", "Error Loading View", e.getMessage(), AlertType.ERROR);
+        }
     }
     
 }
