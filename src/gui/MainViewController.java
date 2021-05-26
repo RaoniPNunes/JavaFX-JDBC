@@ -83,7 +83,7 @@ public class MainViewController implements Initializable {
             Alerts.showAlert("IOExcpetion", "Erro ao carregar a View", e.getMessage(), Alert.AlertType.ERROR);
         }
     }
-    
+   // IMPLEMENTADO ATRAVÉS DE FUNÇÃO LAMBDA
    /* private synchronized void loadView2(String caminho){ //Método para gerar nova janela do tipo VBox
         
         try{
