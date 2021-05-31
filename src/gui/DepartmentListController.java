@@ -14,7 +14,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
@@ -58,7 +57,8 @@ public class DepartmentListController implements Initializable{
     @FXML
     public void onBtNewAction(ActionEvent event){
         Stage parentStage = Utils.currentStage(event);
-        createDialogForm("/gui/DepartmentForm.fxml", parentStage);
+        Department obj = new Department();
+        createDialogForm(obj, "/gui/DepartmentForm.fxml", parentStage);
     }
 
     @Override
@@ -95,10 +95,15 @@ public class DepartmentListController implements Initializable{
         tableViewDepartment.setItems(obsList);
     }
     
-    private void createDialogForm(String caminho, Stage parentStage){
+    private void createDialogForm(Department obj, String caminho, Stage parentStage){
         try{
             FXMLLoader loader = new FXMLLoader(getClass().getResource(caminho));
             Pane pane = loader.load();
+            
+            DepartmentFormController controller = loader.getController();
+            controller.setDepartment(obj);
+            controller.setDepartmentService(new DepartmentServices());
+            controller.updateFormData();
             
             //Para se crair uma nova view em cima da view que está sendo mostrada
             //é necessário se criar um novo stage.
@@ -109,7 +114,7 @@ public class DepartmentListController implements Initializable{
             dialogStage.setResizable(false);
             dialogStage.initOwner(parentStage);//-> informa-se o stage pai em que vai surgir o dialogStage view
             dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.showAndWait();
+            dialogStage.show();
         }
         catch(IOException e){
             Alerts.showAlert("IO Exception", "Error Loading View", e.getMessage(), AlertType.ERROR);

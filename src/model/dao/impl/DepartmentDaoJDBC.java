@@ -23,13 +23,25 @@ public class DepartmentDaoJDBC implements DepartmentDao{
         
         try{
             ps = con.prepareStatement("INSERT INTO department "
-                                      +"(Id, Name) "
+                                      +"(Name) "
                                       +"VALUES "
-                                      +"(?, ?)");
-            ps.setInt(1, obj.getId());
-            ps.setString(2, obj.getName());
+                                      +"(?)",
+                                        Statement.RETURN_GENERATED_KEYS);
             
-            ps.executeUpdate();
+            ps.setString(1, obj.getName());
+            
+            int rowAffected = ps.executeUpdate();
+            
+            if (rowAffected > 0){
+                ResultSet rs = ps.getGeneratedKeys();
+                if(rs.next()){
+                    int id = rs.getInt(1);
+                    obj.setId(id);
+                }
+            }
+            else{
+                throw new DbException("Erro inesperado!");
+            }
                        
         }
         catch (SQLException e){
