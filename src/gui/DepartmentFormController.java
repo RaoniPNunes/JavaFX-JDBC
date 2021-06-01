@@ -9,7 +9,9 @@ import gui.util.Utils;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entities.Department;
+import model.exceptions.ValidationException;
 import model.services.DepartmentServices;
 
 
@@ -27,6 +30,7 @@ public class DepartmentFormController implements Initializable {
     
     private DepartmentServices service;
     
+    //lista para guardar os inscritos para o padrão observer event
     private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
     
     @FXML
@@ -54,6 +58,7 @@ public class DepartmentFormController implements Initializable {
         this.service = service;
     }
     
+    //método de inscrição dos objetos listeners (observers)
     public void subscribeDataChangeListener (DataChangeListener listener){
         dataChangeListeners.add(listener);
     }
@@ -73,6 +78,9 @@ public class DepartmentFormController implements Initializable {
         service.saveOrUpdate(entity);
         notifyDataChangeListeners();
         Utils.currentStage(event).close();
+        }
+        catch(ValidationException e){
+            setErrorMessages(e.getErrors());
         }
         catch(DbException e){
             Alerts.showAlert("Erro ao salvar o departamento", null, e.getMessage(), Alert.AlertType.ERROR);
@@ -110,15 +118,37 @@ public class DepartmentFormController implements Initializable {
     private Department getFormData() {
         Department obj = new Department();
         
+        ValidationException exception = new ValidationException("Erro de Validação");
+        
         obj.setId(Utils.tryParseToInt(txtId.getText()));
+        
+        if(txtName.getText() == null || txtName.getText().trim().equals("")){
+            exception.addErrors("Name", "Campo Name não pode ficar vázio");
+        }
         obj.setName(txtName.getText());
+        
+        if(exception.getErrors().size() > 0){
+            throw exception;
+        }
         
         return obj;
     }
     
+    //os objetos inscritos irão executar um determinado método previsto em uma interface.
+    //No presente caso, para cada objeto inscrito (observer) executa o onDataChange.
+    //OBS: o onDataChange foi implementado na classe DepartmentListController e executa o updateTableView
+    
     private void notifyDataChangeListeners(){
         for(DataChangeListener listener : dataChangeListeners){
             listener.onDataChange();
+        }
+    }
+    
+    private void setErrorMessages(Map<String, String> errors){
+        Set<String> campos = errors.keySet();
+        
+        if(campos.contains("Name")){
+            labelErrorName.setText(errors.get("Name"));
         }
     }
     

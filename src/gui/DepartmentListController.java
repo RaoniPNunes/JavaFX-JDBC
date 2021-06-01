@@ -123,10 +123,12 @@ public class DepartmentListController implements Initializable, DataChangeListen
             Alerts.showAlert("IO Exception", "Error Loading View", e.getMessage(), AlertType.ERROR);
         }
     }
-
+    
+    //essa classe que oferece a inscrição de objetos precisa implementar o método da interface
+    //no caso, cada objeto implementado vai efetuar a atualização da tableview.
     @Override
     public void onDataChange() {
-        updateTableView();
+        updateTableView(); //-> cada objeto inscrito vai executar a atualização de tabela
     }
     
 }
