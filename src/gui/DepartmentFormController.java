@@ -2,10 +2,13 @@
 package gui;
 
 import db.DbException;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,6 +27,8 @@ public class DepartmentFormController implements Initializable {
     
     private DepartmentServices service;
     
+    private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
+    
     @FXML
     private TextField txtId;
     
@@ -39,12 +44,18 @@ public class DepartmentFormController implements Initializable {
     @FXML
     private Button btCancel;
     
+    //dependência da classe Department
     public void setDepartment(Department entity){
         this.entity = entity;
     }
     
+    //dependência da classe DepartmentService
     public void setDepartmentService(DepartmentServices service){
         this.service = service;
+    }
+    
+    public void subscribeDataChangeListener (DataChangeListener listener){
+        dataChangeListeners.add(listener);
     }
     
     @FXML
@@ -60,6 +71,7 @@ public class DepartmentFormController implements Initializable {
         try{
         entity = getFormData();
         service.saveOrUpdate(entity);
+        notifyDataChangeListeners();
         Utils.currentStage(event).close();
         }
         catch(DbException e){
@@ -83,6 +95,7 @@ public class DepartmentFormController implements Initializable {
         Constraints.setTextFieldMaxLength(txtName, 30);
     }
     
+    //método para popular (atribuir valores) ao txtId e o txtName
     public void updateFormData(){
         if(entity == null){
             throw new IllegalStateException("Entity was null");
@@ -93,6 +106,7 @@ public class DepartmentFormController implements Initializable {
 
     //método para pegar os dados do formulário (departmentForm) e instanciar e retornar um
     //novo objeto do tipo Department.
+    //Obs: os valores do formulário foram atribuídos pelo método updateFormData()
     private Department getFormData() {
         Department obj = new Department();
         
@@ -100,6 +114,12 @@ public class DepartmentFormController implements Initializable {
         obj.setName(txtName.getText());
         
         return obj;
+    }
+    
+    private void notifyDataChangeListeners(){
+        for(DataChangeListener listener : dataChangeListeners){
+            listener.onDataChange();
+        }
     }
     
 }

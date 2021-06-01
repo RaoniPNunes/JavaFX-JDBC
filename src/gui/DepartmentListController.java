@@ -1,6 +1,7 @@
 
 package gui;
 
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
 import java.io.IOException;
@@ -26,7 +27,7 @@ import model.entities.Department;
 import model.services.DepartmentServices;
 
 
-public class DepartmentListController implements Initializable{
+public class DepartmentListController implements Initializable, DataChangeListener{
     
     //Injetando uma dependência do DepartmentServices para acessar os métodos dessa classe
     private DepartmentServices service;
@@ -101,11 +102,13 @@ public class DepartmentListController implements Initializable{
             Pane pane = loader.load();
             
             DepartmentFormController controller = loader.getController();
+            //controller acessa as classes Department e DepartmentService pelas dependências
             controller.setDepartment(obj);
             controller.setDepartmentService(new DepartmentServices());
+            controller.subscribeDataChangeListener(this);
             controller.updateFormData();
             
-            //Para se crair uma nova view em cima da view que está sendo mostrada
+            //Para se criar uma nova view em cima da view que está sendo mostrada
             //é necessário se criar um novo stage.
             
             Stage dialogStage = new Stage();
@@ -119,6 +122,11 @@ public class DepartmentListController implements Initializable{
         catch(IOException e){
             Alerts.showAlert("IO Exception", "Error Loading View", e.getMessage(), AlertType.ERROR);
         }
+    }
+
+    @Override
+    public void onDataChange() {
+        updateTableView();
     }
     
 }
