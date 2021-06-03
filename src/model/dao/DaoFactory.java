@@ -11,7 +11,7 @@ public class DaoFactory {
     
     Connection con = DB.getConnection();
     
-    public static SellerDao createSellerdao(){
+    public static SellerDao createSellerDao(){
         return new SellerDaoJDBC(DB.getConnection());
     }
     

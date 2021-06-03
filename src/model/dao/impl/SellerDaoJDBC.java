@@ -1,5 +1,6 @@
 package model.dao.impl;
 
+import db.DB;
 import db.DbException;
 import java.util.List;
 import model.dao.SellerDao;
@@ -12,7 +13,7 @@ import model.entities.Department;
 
 public class SellerDaoJDBC implements SellerDao {
 
-    private Connection con;
+    private Connection con = DB.getConnection();
 
     public SellerDaoJDBC(Connection con) {
         this.con = con;
@@ -123,17 +124,17 @@ public class SellerDaoJDBC implements SellerDao {
     public List<Sellers> findAll() {
         PreparedStatement ps = null;
         ResultSet rs = null;
+        List<Sellers> list = new ArrayList<>();
 
         try {
-            ps = con.prepareStatement("SELECT seller.*, department.Name as DepName "
+            ps = con.prepareStatement("select seller.*, department.Name as DepName "
                                       + "FROM seller INNER JOIN department "
                                       + "ON seller.DepartmentId = department.Id "
                                       + "ORDER BY Name ");
                      
             rs = ps.executeQuery();
             
-            List<Sellers> list = new ArrayList<>();
-            Map<Integer, Department> map = new HashMap<>();
+                        Map<Integer, Department> map = new HashMap<>();
 
             while (rs.next()) {
                 
