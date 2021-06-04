@@ -7,20 +7,32 @@ import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
 import java.net.URL;
+import java.time.*;
+import java.time.temporal.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.util.Callback;
+import model.entities.Department;
 import model.entities.Sellers;
 import model.exceptions.ValidationException;
+import model.services.DepartmentServices;
 import model.services.SellerServices;
 
 
@@ -29,6 +41,8 @@ public class SellerFormController implements Initializable {
     private Sellers entity;
     
     private SellerServices service;
+    
+    private DepartmentServices departmentService;
     
     //lista para guardar os inscritos para o padrão observer event
     private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
@@ -39,8 +53,29 @@ public class SellerFormController implements Initializable {
     @FXML
     private TextField txtName;
     
+    @FXML
+    private TextField txtEmail;
+    
+    @FXML
+    private DatePicker dpBirthDate;
+    
+    @FXML
+    private TextField txtBaseSalary;
+    
+    @FXML
+    private ComboBox<Department> comboBoxDepartment;
+    
     @FXML 
     private Label labelErrorName;
+    
+    @FXML 
+    private Label labelErrorEmail;
+    
+    @FXML 
+    private Label labelErrorBirthDate;
+    
+    @FXML 
+    private Label labelErrorBaseSalary;
     
     @FXML
     private Button btSave;
@@ -48,14 +83,18 @@ public class SellerFormController implements Initializable {
     @FXML
     private Button btCancel;
     
+    @FXML
+    private ObservableList<Department> obsList;
+    
     //dependência da classe Sellers
     public void setSellers(Sellers entity){
         this.entity = entity;
     }
     
     //dependência da classe SellerService
-    public void setSellerService(SellerServices service){
+    public void setServices(SellerServices service, DepartmentServices departmentService){
         this.service = service;
+        this.departmentService = departmentService;
     }
     
     //método de inscrição dos objetos listeners (observers)
@@ -74,10 +113,10 @@ public class SellerFormController implements Initializable {
             throw new IllegalStateException("Service was null");
         }
         try{
-        entity = getFormData();
-        service.saveOrUpdate(entity);
-        notifyDataChangeListeners();
-        Utils.currentStage(event).close();
+            entity = getFormData();
+            service.saveOrUpdate(entity);
+            notifyDataChangeListeners();
+            Utils.currentStage(event).close();
         }
         catch(ValidationException e){
             setErrorMessages(e.getErrors());
@@ -100,7 +139,12 @@ public class SellerFormController implements Initializable {
     
     private void initializeNodes(){
         Constraints.setTextFieldInteger(txtId);
-        Constraints.setTextFieldMaxLength(txtName, 30);
+        Constraints.setTextFieldMaxLength(txtName, 70);
+        Constraints.setTextFieldDouble(txtBaseSalary);
+        Constraints.setTextFieldMaxLength(txtEmail, 60);
+        Utils.formatDatePicker(dpBirthDate, "dd/MM/yyyy");
+        
+        initializeComboBoxDepartment(); 
     }
     
     //método para popular (atribuir valores) ao txtId e o txtName
@@ -110,6 +154,24 @@ public class SellerFormController implements Initializable {
         }
         txtId.setText(String.valueOf(entity.getId()));
         txtName.setText(entity.getName());
+        txtEmail.setText(entity.getEmail());
+        Locale.setDefault(Locale.US);
+        txtBaseSalary.setText(String.format("%.2f", entity.getBasesalary()));
+        if(entity.getBirthdate() != null){
+        dpBirthDate.setValue(LocalDateTime.ofInstant(entity.getBirthdate().toInstant(), ZoneId.systemDefault()).toLocalDate());
+        }
+        if(entity.getDepartment() == null){
+            comboBoxDepartment.getSelectionModel().selectFirst();
+        }
+        else{
+        comboBoxDepartment.setValue(entity.getDepartment());
+        }
+    }
+    
+    public void loadAssociatedObjects(){
+        List<Department> list = departmentService.findAll();
+        obsList = FXCollections.observableArrayList(list);
+        comboBoxDepartment.setItems(obsList);
     }
 
     //método para pegar os dados do formulário (SellersForm) e instanciar e retornar um
@@ -150,6 +212,18 @@ public class SellerFormController implements Initializable {
         if(campos.contains("Name")){
             labelErrorName.setText(errors.get("Name"));
         }
+    }
+    
+    private void initializeComboBoxDepartment() {
+    Callback<ListView<Department>, ListCell<Department>> factory = lv -> new ListCell<Department>() {
+            @Override
+            protected void updateItem(Department item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? "" : item.getName());
+            }
+        };
+        comboBoxDepartment.setCellFactory(factory);
+        comboBoxDepartment.setButtonCell(factory.call(null));
     }
 
        

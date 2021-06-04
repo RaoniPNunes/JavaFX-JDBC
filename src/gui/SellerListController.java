@@ -31,6 +31,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Department;
 import model.entities.Sellers;
+import model.services.DepartmentServices;
 import model.services.SellerServices;
 
 
@@ -133,7 +134,8 @@ public class SellerListController implements Initializable, DataChangeListener{
             SellerFormController controller = loader.getController();
             //controller acessa as classes Sellers e SellerService pelas dependências
             controller.setSellers(obj);
-            controller.setSellerService (new SellerServices());
+            controller.setServices (new SellerServices(), new DepartmentServices());
+            controller.loadAssociatedObjects();
             controller.subscribeDataChangeListener(this);
             controller.updateFormData();
             
@@ -141,7 +143,7 @@ public class SellerListController implements Initializable, DataChangeListener{
             //é necessário se criar um novo stage.
             
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("Inserir Novo Departamento");
+            dialogStage.setTitle("Inserir Novo Vendedor");
             dialogStage.setScene(new Scene(pane));//-> cria-se uma nova Scene nesse novo stage
             dialogStage.setResizable(false);
             dialogStage.initOwner(parentStage);//-> informa-se o stage pai em que vai surgir o dialogStage view
