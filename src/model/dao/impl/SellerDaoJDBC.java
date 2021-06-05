@@ -24,7 +24,7 @@ public class SellerDaoJDBC implements SellerDao {
         PreparedStatement st = null;
         
         try{
-            st = con.prepareStatement("INSERT INTO sellers "
+            st = con.prepareStatement("INSERT INTO seller "
                                      +"(Name, Email, BirthDate, BaseSalary, DepartmentId) "
                                      +"VALUES "
                                      +"(?, ?, ?, ?, ?) ");
@@ -51,7 +51,7 @@ public class SellerDaoJDBC implements SellerDao {
                         
         }
         catch(SQLException e){
-            throw new DbException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -60,7 +60,7 @@ public class SellerDaoJDBC implements SellerDao {
         PreparedStatement st = null;
         
         try{
-            st = con.prepareStatement("UPDATE sellers "
+            st = con.prepareStatement("UPDATE seller "
                                      +"SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? "
                                      +"WHERE Id = ? ");
             
@@ -84,7 +84,7 @@ public class SellerDaoJDBC implements SellerDao {
         PreparedStatement ps = null;
         
         try{
-            ps = con.prepareStatement("DELETE FROM sellers "
+            ps = con.prepareStatement("DELETE FROM seller "
                                      +"WHERE Id = ?");
             ps.setInt(1, id);
             

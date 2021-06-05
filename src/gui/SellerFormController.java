@@ -10,6 +10,7 @@ import java.net.URL;
 import java.time.*;
 import java.time.temporal.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -116,6 +117,7 @@ public class SellerFormController implements Initializable {
             entity = getFormData();
             service.saveOrUpdate(entity);
             notifyDataChangeListeners();
+            Alerts.showAlert("Confirmação de Salvamento", null, "Novo Vendedor Salvo com Sucesso", Alert.AlertType.CONFIRMATION);
             Utils.currentStage(event).close();
         }
         catch(ValidationException e){
@@ -189,6 +191,29 @@ public class SellerFormController implements Initializable {
         }
         obj.setName(txtName.getText());
         
+        if(txtEmail.getText() == null || txtEmail.getText().trim().equals("")){
+            exception.addErrors("Email", "Campo Email não pode ficar vázio");
+        }
+        obj.setEmail(txtEmail.getText());
+        
+        if(dpBirthDate == null){
+            exception.addErrors("BirthDate", "Campo BirthDate não pode ficar vázio");
+        }
+        else{
+        DatePicker dp = new DatePicker(LocalDate.now());
+        LocalDate ld = dp.getValue();
+        Instant instant = Instant.from(ld.atStartOfDay(ZoneId.systemDefault()));
+        Date date = Date.from(instant);
+        obj.setBirthdate(date);
+        }
+        
+        if(txtBaseSalary.getText() == null || txtBaseSalary.getText().trim().equals("")){
+            exception.addErrors("Salário Base", "Campo Salário Base não pode ficar vázio");
+        }
+        obj.setBasesalary(Utils.tryParseToDouble(txtBaseSalary.getText()));
+        
+        obj.setDepartment(comboBoxDepartment.getValue());
+        
         if(exception.getErrors().size() > 0){
             throw exception;
         }
@@ -211,6 +236,30 @@ public class SellerFormController implements Initializable {
         
         if(campos.contains("Name")){
             labelErrorName.setText(errors.get("Name"));
+        }
+        else{
+            labelErrorName.setText("");
+        }
+        
+        if(campos.contains("Email")){
+            labelErrorEmail.setText(errors.get("Email"));
+        }
+        else{
+            labelErrorEmail.setText("");
+        }
+        
+        if(campos.contains("Salário Base")){
+            labelErrorBaseSalary.setText(errors.get("Salário Base"));
+        }
+        else{
+            labelErrorBaseSalary.setText("");
+        }
+        
+        if(campos.contains("BirthDate")){
+            labelErrorBirthDate.setText(errors.get(""));
+        }
+        else{
+            labelErrorBirthDate.setText("");
         }
     }
     
